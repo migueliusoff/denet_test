@@ -1,3 +1,6 @@
+from pprint import pprint
+
+from moralis import evm_api
 from web3 import HTTPProvider, Web3
 
 import settings
@@ -20,12 +23,19 @@ class PolygonInfoService:
             balances.append(self.get_balance(address))
         return balances
 
+    def get_top(self, n: int) -> list[tuple[str, int]]:
+        params = {"chain": "polygon", "address": self.contract_address}
+
+        result = evm_api.token.get_wallet_token_balances(
+            api_key=settings.MORALIS_API_KEY,
+            params=params,
+        )
+
+        result = sorted(result, key=lambda x: int(x["balance"]), reverse=True)[:n]
+        return [(item["token_address"], item["balance"]) for item in result]
+
 
 if __name__ == "__main__":
     with open(settings.ABI_JSON_FILE, "r") as abi_json_file:
         service = PolygonInfoService(settings.CONTRACT_ADDRESS, abi_json_file.read())
-        print(
-            service.get_balance_batch(
-                ["0x51f1774249Fc2B0C2603542Ac6184Ae1d048351d", "0x4830AF4aB9cd9E381602aE50f71AE481a7727f7C"]
-            )
-        )
+        pprint(service.get_top(10))

@@ -10,6 +10,7 @@ package-mode = false
 python = "^3.12"
 web3 = "^7.3.0"
 python-dotenv = "^1.0.1"
+moralis = "^0.1.49"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
