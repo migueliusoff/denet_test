@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from moralis import evm_api
 from web3 import HTTPProvider, Web3
 
@@ -34,8 +32,18 @@ class PolygonInfoService:
         result = sorted(result, key=lambda x: int(x["balance"]), reverse=True)[:n]
         return [(item["token_address"], item["balance"]) for item in result]
 
+    def get_token_info(self, token_address: str) -> dict:
+        params = {"chain": "polygon", "addresses": [token_address]}
+
+        result = evm_api.token.get_token_metadata(
+            api_key=settings.MORALIS_API_KEY,
+            params=params,
+        )
+
+        return result[0]
+
 
 if __name__ == "__main__":
     with open(settings.ABI_JSON_FILE, "r") as abi_json_file:
         service = PolygonInfoService(settings.CONTRACT_ADDRESS, abi_json_file.read())
-        pprint(service.get_top(10))
+        print(service.get_token_info(service.contract_address))
