@@ -1,14 +1,19 @@
+from django.conf import settings
 from moralis import evm_api
 from web3 import HTTPProvider, Web3
 
-import settings
-
 
 class PolygonInfoService:
-    def __init__(self, contract_address: str, abi: str, http_provider_url: str = "https://polygon-rpc.com"):
+    def __init__(
+        self,
+        contract_address: str,
+        abi_path: str = settings.ABI_JSON_FILE,
+        http_provider_url: str = "https://polygon-rpc.com",
+    ):
         self.w3 = Web3(HTTPProvider(http_provider_url))
         self.contract_address = Web3.to_checksum_address(contract_address)
-        self.abi = abi
+        with open(abi_path, "r") as abi_json_file:
+            self.abi = abi_json_file.read()
 
     def get_balance(self, address: str) -> int:
         address = Web3.to_checksum_address(address)
@@ -41,9 +46,3 @@ class PolygonInfoService:
         )
 
         return result[0]
-
-
-if __name__ == "__main__":
-    with open(settings.ABI_JSON_FILE, "r") as abi_json_file:
-        service = PolygonInfoService(settings.CONTRACT_ADDRESS, abi_json_file.read())
-        print(service.get_token_info(service.contract_address))
